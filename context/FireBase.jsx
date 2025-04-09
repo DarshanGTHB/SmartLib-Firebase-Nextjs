@@ -11,6 +11,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
+import toast from "react-hot-toast";
 // import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -72,7 +73,8 @@ export const FireBaseProvider = ({ children }) => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       console.log("User signed in with Google:", user);
-      window.location.href = '/';
+      toast.success("Successfully signed in!");
+      // window.location.href = '/';
       return user;
     } catch (error) {
       console.error("Error signing in with Google:", error);
@@ -86,6 +88,8 @@ export const FireBaseProvider = ({ children }) => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       console.log("User signed in with GitHub:", user);
+      toast.success("Successfully signed in!");
+
       return user;
     } catch (error) {
       console.error("Error signing in with GitHub:", error);
