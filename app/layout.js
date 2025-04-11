@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { FireBaseProvider } from "@/context/FireBase";
 import { Toaster } from "react-hot-toast";
+import Navbar from "./components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +24,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body      >
         <FireBaseProvider>
-
+        <Navbar></Navbar>  
         {children}
         <Toaster position="top-center" reverseOrder={false} />
         </FireBaseProvider>
