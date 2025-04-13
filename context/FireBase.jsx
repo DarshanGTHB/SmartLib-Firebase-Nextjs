@@ -14,8 +14,19 @@ import {
   signOut,
 } from "firebase/auth";
 import toast from "react-hot-toast";
-import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
-import { createClient } from '@supabase/supabase-js';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  getDoc,
+} from "firebase/firestore";
+import { createClient } from "@supabase/supabase-js";
+import { toastNeutral } from "@/app/utils/toast";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -25,8 +36,8 @@ const firebaseConfig = {
   messagingSenderId: "426837014307",
   appId: "1:426837014307:web:cc7cb77778621f4c163e96",
 };
-const SUPABASE_URL    = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // Initialize Firebase
@@ -129,11 +140,9 @@ export const FireBaseProvider = ({ children }) => {
       console.error("Error signing out:", error);
       throw error;
     }
-  }
-
+  };
 
   console.log("current user : ", user);
-
 
   const CreateNewListing = async (listingData) => {
     try {
@@ -151,16 +160,68 @@ export const FireBaseProvider = ({ children }) => {
     }
   };
 
-
   const FetchAllListings = async () => {
     //data from firebase
     const booksRef = collection(firestore, "books");
     const snapshot = await getDocs(booksRef);
     const books = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     return books;
-  }
+  };
 
   const isLoggedIn = user ? true : false;
+
+  const addToCart = async (item) => {
+    if (!user) return toast.error("You must be logged in to add to cart.");
+
+    const itemRef = doc(firestore, `users/${user.uid}/cart/${item.id}`);
+    try {
+      const docSnap = await getDoc(itemRef);
+      if (docSnap.exists()) {
+        // toast.success("Item already in cart!");
+        toastNeutral("Item already in cart!");
+        return;
+      }
+      await setDoc(itemRef, {
+        ...item,
+        quantity: item.quantity || 1,
+      });
+      toast.success("Item added to cart!");
+    } catch (error) {
+      console.error("Failed to add item to cart:", error);
+      toast.error("Failed to add item.");
+    }
+  };
+
+  const removeFromCart = async (itemId) => {
+    if (!user) return;
+
+    const itemRef = doc(firestore, `users/${user.uid}/cart/${itemId}`);
+    try {
+      await deleteDoc(itemRef);
+      toast.success("Item removed from cart!");
+    } catch (error) {
+      console.error("Error removing item:", error);
+      toast.error("Could not remove item.");
+    }
+  };
+  const updateCartItemQuantity = async (itemId, quantity) => {
+    if (!user) return;
+
+    const itemRef = doc(firestore, `users/${user.uid}/cart/${itemId}`);
+    try {
+      await updateDoc(itemRef, { quantity });
+    } catch (error) {
+      console.error("Failed to update quantity:", error);
+      toast.error("Failed to update item quantity.");
+    }
+  }; // Fetch all cart items
+  const getCartItems = async () => {
+    if (!user) return [];
+
+    const cartRef = collection(firestore, `users/${user.uid}/cart`);
+    const snapshot = await getDocs(cartRef);
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  };
 
   return (
     <FireBaseContext.Provider
@@ -172,7 +233,11 @@ export const FireBaseProvider = ({ children }) => {
         CreateNewListing,
         FetchAllListings,
         signOutUser,
-        user
+        user,
+        addToCart,
+        removeFromCart,
+        updateCartItemQuantity,
+        getCartItems,
       }}
     >
       {children}

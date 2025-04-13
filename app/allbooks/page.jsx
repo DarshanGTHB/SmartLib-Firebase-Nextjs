@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useFireBase } from "@/context/FireBase";
+import { ShoppingCart } from "lucide-react";
 
 const AllBooks = () => {
   const [books, setBooks] = useState([]);
@@ -39,6 +40,13 @@ const AllBooks = () => {
               <p className="text-sm text-blue-600">By {book.author}</p>
               <p className="text-sm text-blue-500">ISBN: {book.isbn}</p>
               <p className="text-lg font-bold text-blue-700">₹{book.price}</p>
+              <button
+                onClick={() => firebase.addToCart(book)}
+                className="flex items-center gap-2 bg-blue-600 text-white font-medium px-5 py-2 rounded-xl shadow hover:bg-blue-700 transition"
+              >
+                <ShoppingCart size={18} />
+                Add to Cart
+              </button>
             </div>
           </div>
         ))}

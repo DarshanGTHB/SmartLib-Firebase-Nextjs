@@ -25,6 +25,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useFireBase } from "@/context/FireBase";
+import { ShoppingCart } from "lucide-react";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -91,10 +92,12 @@ export default function Navbar() {
                   </div>
                 </Link>
               </>
-            ) :
-            (
+            ) : (
               <>
-              <div
+                <Link href={"/cart"} className="relative flex items-center">
+                  <ShoppingCart size={18} />
+                </Link>
+                <div
                   onClick={() => firebase.signOutUser()}
                   className="px-4 py-2 rounded-md bg-blue-500 text-white font-semibold hover:bg-blue-600 transition"
                 >
@@ -108,9 +111,7 @@ export default function Navbar() {
                   </div>
                 </div>
               </>
-
-            )
-            }
+            )}
           </div>
 
           {/* Mobile Menu Button */}
